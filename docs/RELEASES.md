@@ -45,6 +45,11 @@ only one `main` branch to install from.
 3. `node scripts/validate-marketplace.mjs`
 4. Open a PR using `.github/pull_request_template.md`.
 
+`node scripts/release.mjs <plugin-name> <patch|minor|major|X.Y.Z>` automates steps
+1–3: it finds whichever single location (`plugin.json` or the marketplace entry)
+currently holds the version, bumps it, and runs the validator. It never commits or
+opens the PR for you.
+
 ## Rollback
 
 - Plugin in this repo: `git revert` the commit that bumped the version — the previous
@@ -57,3 +62,12 @@ only one `main` branch to install from.
   ```json
   "renames": { "old-plugin-name": null }
   ```
+
+`node scripts/rollback.mjs` automates the file-based repo case:
+
+- `history <plugin-name>` — lists commits that changed the version field, newest first.
+- `revert <plugin-name>` — dry-runs the `git revert` for the most recent one; add
+  `--yes` to actually stage it (`git revert --no-commit`) for you to review and commit.
+- `disable <plugin-name>` — removes the entry from `plugins[]` and adds
+  `renames[<plugin-name>] = null` in one step, for the "remove from discovery
+  immediately" case in [SECURITY.md](./SECURITY.md#after-a-dangerous-release).

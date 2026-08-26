@@ -53,9 +53,11 @@ script, unreviewed `command` source that shipped anyway):
 1. Rotate any credential that may have been exposed immediately — do this before
    anything else, a `git revert` does not invalidate a leaked secret.
 2. Roll back the affected plugin to the last known-safe version (see
-   [RELEASES.md — Rollback](./RELEASES.md#rollback)).
+   [RELEASES.md — Rollback](./RELEASES.md#rollback), or run
+   `node scripts/rollback.mjs revert <plugin-name> --yes`).
 3. If the plugin cannot be made safe quickly, remove it from discovery via `renames`
-   (`"plugin-name": null`) rather than leaving a broken entry installable.
+   (`"plugin-name": null`) rather than leaving a broken entry installable — or run
+   `node scripts/rollback.mjs disable <plugin-name>`.
 4. Bump a new `PATCH`/`MAJOR` version once fixed, per SemVer, so cached installs pick up
    the fix on next update.
 5. Note what happened and the fix in the PR that resolves it — this repo has no separate
