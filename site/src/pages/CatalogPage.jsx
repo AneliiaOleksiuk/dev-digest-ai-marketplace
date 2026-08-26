@@ -43,6 +43,15 @@ export default function CatalogPage({ items, isFavorite, onToggleFavorite }) {
     return list;
   }, [fuse, items, query, type, tag, favoritesOnly, sort, isFavorite]);
 
+  if (items.length === 0) {
+    return (
+      <div className="empty-state">
+        <p>No plugins published yet.</p>
+        <p>Once one is registered in marketplace.json, it shows up here automatically.</p>
+      </div>
+    );
+  }
+
   return (
     <div>
       <SearchBar value={query} onChange={(v) => setParam("q", v)} />

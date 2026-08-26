@@ -18,10 +18,13 @@ npm run dev
 `npm run dev` regenerates `public/data/*.json` first (via the `predev` hook)
 and then starts the Vite dev server, printing a local URL to open.
 
-If `plugins/` has no registered plugins yet (the current state of this
-repo), the index generator automatically falls back to the bundled sample
-catalog in `src/data/sample-index.json` so the UI always has something to
-show. Add a real plugin and the fallback stops being used.
+Only plugins actually registered in `../.claude-plugin/marketplace.json`
+are shown — never anything else. If none are registered yet, the catalog
+renders as empty; it never shows fake data by default.
+
+To preview the UI with bundled fixture data while `plugins/` is still empty,
+run `npm run dev:sample` instead. This is a dev-only escape hatch: it never
+runs in CI or in a real build (`npm run build` never passes `--sample`).
 
 ## Building
 

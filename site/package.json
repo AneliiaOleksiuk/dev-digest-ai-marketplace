@@ -7,6 +7,7 @@
     "build:index": "node ../scripts/build-index.mjs",
     "predev": "npm run build:index",
     "dev": "vite",
+    "dev:sample": "node ../scripts/build-index.mjs --sample && vite",
     "prebuild": "npm run build:index",
     "build": "vite build",
     "preview": "vite preview"

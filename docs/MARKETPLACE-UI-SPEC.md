@@ -206,8 +206,8 @@ Aggregated view described in §8.4.
 
 ### 8.6 Theme toggle
 
-- Light/dark, persisted in `localStorage`, defaulting to the OS preference
-  (`prefers-color-scheme`).
+- Dark-first: the app defaults to dark regardless of OS preference. Light
+  is available via a toggle, persisted in `localStorage`.
 
 ## 9. Suggested stack
 
@@ -242,6 +242,14 @@ the repo.
   into per-plugin detail files as originally sketched in §4.2) — simpler
   for the current catalog size; revisit only if payload size becomes a
   real problem (see §5.1's Pagefind note).
+- **Real data only:** `build-index.mjs` indexes exactly the plugins
+  registered in `marketplace.json` `plugins[]` (matching
+  `validate-marketplace.mjs`'s own notion of "real") — a folder under
+  `plugins/` that isn't registered there is never picked up. The bundled
+  fixture in `site/src/data/sample-index.json` is used only when the
+  script is explicitly run with `--sample` (`npm run dev:sample`); a plain
+  build or `npm run dev` renders an empty catalog until real plugins exist,
+  never placeholder ones.
 
 ## 12. Prototype
 

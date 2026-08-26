@@ -10,13 +10,12 @@
 // If no plugins are registered yet (fresh marketplace), it falls back to
 // the bundled sample data in site/src/data/ so the UI prototype still has
 // something to show. Real plugin data always wins once any are registered.
-import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, statSync, copyFileSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, statSync } from "node:fs";
 import { join, dirname, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import { execFileSync } from "node:child_process";
 
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
-const pluginsDir = join(repoRoot, "plugins");
 const marketplacePath = join(repoRoot, ".claude-plugin", "marketplace.json");
 const outDir = join(repoRoot, "site", "public", "data");
 const sampleDir = join(repoRoot, "site", "src", "data");
@@ -196,6 +195,7 @@ function buildChangelog(items) {
 }
 
 function main() {
+  const useSample = process.argv.includes("--sample");
   mkdirSync(outDir, { recursive: true });
 
   if (!existsSync(marketplacePath)) {
@@ -204,34 +204,46 @@ function main() {
   }
   const marketplace = readJson(marketplacePath);
 
-  const pluginNames = isDir(pluginsDir)
-    ? readdirSync(pluginsDir).filter((name) => isDir(join(pluginsDir, name)))
-    : [];
-
+  // Source of truth is marketplace.json's plugins[], not the plugins/
+  // folder listing — a directory that isn't registered there (WIP, or
+  // removed via `renames`) must never show up in the public catalog.
   let items = [];
-  for (const name of pluginNames) {
-    const pluginDir = join(pluginsDir, name);
+  let indexedCount = 0;
+  for (const entry of marketplace.plugins || []) {
+    if (typeof entry.source !== "string" || !entry.source.startsWith("./")) {
+      console.log(`Skipping "${entry.name}" — only file-based (./plugins/...) sources are indexed.`);
+      continue;
+    }
+    const pluginDir = join(repoRoot, entry.source);
     const pluginJsonPath = join(pluginDir, ".claude-plugin", "plugin.json");
-    if (!existsSync(pluginJsonPath)) continue;
+    if (!existsSync(pluginJsonPath)) {
+      console.log(`Skipping "${entry.name}" — no .claude-plugin/plugin.json at ${entry.source}.`);
+      continue;
+    }
     const pluginJson = readJson(pluginJsonPath);
-    items.push(...buildItemsForPlugin(name, pluginDir, pluginJson, marketplace.name));
+    items.push(...buildItemsForPlugin(entry.name, pluginDir, pluginJson, marketplace.name));
+    indexedCount += 1;
   }
 
-  const usedSampleData = items.length === 0;
-  if (usedSampleData) {
+  if (items.length === 0 && useSample) {
     items = readJson(join(sampleDir, "sample-index.json"));
+    console.log(
+      `No registered plugins found — using bundled SAMPLE data (${items.length} items) because ` +
+        `--sample was passed. Never do this for a real deploy.`
+    );
   }
+
   computeRelated(items);
   const changelog = buildChangelog(items);
 
   writeFileSync(join(outDir, "search-index.json"), `${JSON.stringify(items, null, 2)}\n`);
   writeFileSync(join(outDir, "changelog.json"), `${JSON.stringify(changelog, null, 2)}\n`);
 
-  console.log(
-    usedSampleData
-      ? `No registered plugins found — wrote bundled sample data (${items.length} items) to ${relative(repoRoot, outDir)}.`
-      : `Indexed ${items.length} item(s) from ${pluginNames.length} plugin(s) into ${relative(repoRoot, outDir)}.`
-  );
+  if (items.length === 0) {
+    console.log(`No registered plugins yet — wrote an empty catalog to ${relative(repoRoot, outDir)}.`);
+  } else if (!useSample) {
+    console.log(`Indexed ${items.length} item(s) from ${indexedCount} plugin(s) into ${relative(repoRoot, outDir)}.`);
+  }
 }
 
 main();
