@@ -1,0 +1,10 @@
+{
+  "name": "dev-digest-ai-marketplace",
+  "owner": {
+    "name": "AneliiaOleksiuk",
+    "email": "Aneliia.Oleksiuk@onseo.biz"
+  },
+  "description": "Private plugin marketplace for dev-digest-ai tools",
+  "version": "0.1.0",
+  "plugins": []
+}
