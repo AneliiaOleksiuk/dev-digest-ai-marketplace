@@ -96,6 +96,20 @@ try {
   fail("validation failed after the version bump — fix the issue above before opening a PR.");
 }
 
+console.log("\nRunning scripts/check-eval-gate.mjs...");
+try {
+  execFileSync(process.execPath, [join(repoRoot, "scripts", "check-eval-gate.mjs"), pluginName], {
+    cwd: repoRoot,
+    stdio: "inherit",
+  });
+} catch {
+  fail(
+    `eval gate failed for "${pluginName}" at v${nextVersion} — either the published eval summary is stale ` +
+      `(re-run it and update evals/results/latest.json) or it shows a failing case. Fix before opening a PR, ` +
+      `or revert this version bump if the change isn't ready.`
+  );
+}
+
 console.log(
   "\nNext steps:\n" +
     "  1. Review the diff (git diff).\n" +

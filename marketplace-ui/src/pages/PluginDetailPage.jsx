@@ -1,6 +1,7 @@
 import { useNavigate, useParams, Link } from "react-router-dom";
 import InstallBlock from "../components/InstallBlock.jsx";
 import DependencyChips from "../components/DependencyChips.jsx";
+import EvalDashboard from "../components/EvalDashboard.jsx";
 import MarkdownBody from "../components/MarkdownBody.jsx";
 import { KindDot } from "../components/KindBadge.jsx";
 import NotFoundPage from "./NotFoundPage.jsx";
@@ -49,6 +50,8 @@ export default function PluginDetailPage({ items }) {
       </div>
 
       <InstallBlock installCommand={plugin.installCommand} id={`p:${plugin.id}`} githubUrl={githubUrl} />
+
+      <EvalDashboard evals={plugin.evals} />
 
       <section className="detail-section">
         <h2>What's inside</h2>

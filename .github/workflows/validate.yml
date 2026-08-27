@@ -14,3 +14,4 @@ jobs:
         with:
           node-version: "20"
       - run: node scripts/validate-marketplace.mjs
+      - run: node scripts/check-eval-gate.mjs
