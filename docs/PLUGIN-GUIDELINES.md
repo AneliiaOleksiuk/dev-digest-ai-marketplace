@@ -34,9 +34,16 @@ plugins/<plugin-name>/
 - `tags: string[]` — search/filter keywords (see MARKETPLACE-UI-SPEC.md §4).
 - `compatibility: string` — free text, e.g. `"Claude Code ≥ 1.4"` or `"beta"`. Shown as
   a badge on the plugin's detail page.
-- `dependencies: string[]` — other plugins this one expects installed alongside, each
-  `"<plugin-name>"` or `"<plugin-name>:<artifact-name>"`. Documentation only — not an
-  enforced install; rendered as clickable chips on the detail page.
+- `dependencies: (string | { name, version?, marketplace? })[]` — other plugins this one
+  requires. A bare `"<plugin-name>"` tracks whatever version that plugin's marketplace
+  provides; `{ "name": "<plugin-name>", "version": "^1.0.0" }` pins a semver range.
+  Claude Code resolves and auto-installs these when the dependent plugin is installed,
+  and enforces the range at load time — an unsatisfiable or missing dependency disables
+  the plugin with an error (`dependency-unsatisfied`, `range-conflict`,
+  `dependency-version-unsatisfied`, or `no-matching-tag`, surfaced via
+  `claude plugin list --json`). See
+  [Constrain plugin dependency versions](https://code.claude.com/docs/en/plugin-dependencies).
+  Also rendered as clickable chips on the detail page.
 
 Skills/commands/agents can set the same optional `invocation` (their `/name` or
 `@agent-name`) and `tools: string[]` (declared permissions) in their own frontmatter —
