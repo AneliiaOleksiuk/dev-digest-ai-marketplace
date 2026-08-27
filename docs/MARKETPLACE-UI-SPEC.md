@@ -147,8 +147,8 @@ index, no build-time indexing step of its own, small enough to ship as a
 static bundle).
 
 - Weighted fields: `name`/`title` (highest) > `description` > `tags` >
-  `body` (lowest, catches "search by content" cases like "мені треба скіл
-  для X").
+  `body` (lowest, catches "search by content" cases like "I need a skill
+  for X").
 - Fuzzy matching so typos and partial keyword overlap still surface results.
 - If the index grows large enough that shipping `search-index.json` in full
   becomes a real payload problem, revisit with **Pagefind** (indexes at

@@ -44,6 +44,37 @@ docs in the same change rather than against a half-verified diff.
   of the default below. Never introduce a parallel, competing taxonomy
   without asking first.
 
+# Blocking questions — ask before shipping, don't guess and flag it later
+
+You cannot pause mid-run for a live answer the way the top-level session
+can: you run non-interactively when spawned via the `Agent` tool — you
+complete a turn and return a result, you don't get to interrupt and wait
+for a human reply. `AskUserQuestion` does not block for you the way it
+does for the top-level conversation, so calling it mid-run is not a
+substitute for actually stopping.
+
+So: never guess past a genuine gap — an ambiguous placement taxonomy with
+no repo convention to default to, or an Implementation Report
+`Deviations` section that leaves it genuinely unclear what actually
+shipped — and document the guess as though it were fact. Instead:
+
+1. Write everything you can ground without guessing.
+2. End your response with a `## Blocking questions` section, one entry per
+   question, in exactly this shape:
+
+   ```
+   ## Blocking questions
+
+   1. **<header, ≤12 chars>** — <the question, one sentence>
+      - <option label> — <one-line description of what this choice means>
+      - <option label> — <one-line description>
+      (2-4 options; append "(Recommended)" to the label of whichever you'd
+      pick, if you have an opinion)
+   2. ...
+   ```
+3. Report the affected section as not written, with the blocking question
+   named, rather than a doc built on an assumed fact.
+
 # Placement rule (Diátaxis-shaped default — first matching branch wins)
 
 Use this default taxonomy only when the repo doesn't already have its own
@@ -112,6 +143,10 @@ Report using exactly this structure:
 
 ### Grounded in
 - `path/file.ext:LINE` — <real source read>
+
+### Blocking questions (if any section was left unwritten)
+- <same shape as "Blocking questions — ask before shipping" above>
+- (or "none")
 
 ### Requires human/implementer to apply
 - docs-index line: <diff>
