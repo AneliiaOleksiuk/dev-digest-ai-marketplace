@@ -101,9 +101,13 @@ Phase 3b.
 
 ## Phase 3b — Architecture review (only if `architecture-reviewer` is installed)
 
-Skip this phase entirely if the `architecture-reviewer` plugin isn't
-installed — do not attempt to substitute Phase 3's spec-compliance check
-for it.
+"Installed" means enabled in this session (check the actual plugin
+config, not the filesystem) — not "its source happens to exist on disk."
+In this marketplace repo specifically, `architecture-reviewer`'s source
+lives under `plugins/architecture-reviewer/` regardless of whether it's
+enabled anywhere; that path existing is not evidence it's installed here.
+Skip this phase entirely if it isn't actually enabled for this session —
+do not attempt to substitute Phase 3's spec-compliance check for it.
 
 Invoke `architecture-reviewer` (foreground) against the same diff. Show
 the user its findings. Its gate result feeds the fix-loop above: any
@@ -173,7 +177,13 @@ plainly — do not paper over a gap with "should be covered".
   outside this skill.
 - Never skip `test-writer`.
 - Never skip an approval checkpoint, even when a phase looks obviously
-  fine.
+  fine — unless the invoker has explicitly stated upfront that this is an
+  unattended/batch run with no one available to approve between phases
+  (e.g. an eval harness, a CI job). Treat that statement as blanket
+  advance approval for every checkpoint in this run only — it doesn't
+  carry over to a future invocation that doesn't repeat it, and it does
+  not extend to the 3-iteration fix-loop cap or Phase 5 below, which stay
+  hard stops regardless.
 - Never skip Phase 5 (Smoke), even when Phases 1-4 all came back clean —
   the automated suites typically run against mocked dependencies and
   cannot see a live-only failure by construction (see Phase 5).
