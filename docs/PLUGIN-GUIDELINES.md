@@ -29,6 +29,19 @@ plugins/<plugin-name>/
 }
 ```
 
+## Optional plugin.json fields (read by the marketplace UI)
+
+- `tags: string[]` — search/filter keywords (see MARKETPLACE-UI-SPEC.md §4).
+- `compatibility: string` — free text, e.g. `"Claude Code ≥ 1.4"` or `"beta"`. Shown as
+  a badge on the plugin's detail page.
+- `dependencies: string[]` — other plugins this one expects installed alongside, each
+  `"<plugin-name>"` or `"<plugin-name>:<artifact-name>"`. Documentation only — not an
+  enforced install; rendered as clickable chips on the detail page.
+
+Skills/commands/agents can set the same optional `invocation` (their `/name` or
+`@agent-name`) and `tools: string[]` (declared permissions) in their own frontmatter —
+rendered as badges on the artifact's detail page.
+
 ## Manifest checklist
 
 - [ ] `name` is unique within the marketplace, kebab-case

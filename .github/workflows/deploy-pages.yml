@@ -15,7 +15,23 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build:
+  # Same check `validate.yml` runs on every PR/push to main — kept here too,
+  # as its own job, so a manual `workflow_dispatch` deploy (which validate.yml
+  # never sees, since it isn't a pull_request or a push) still gets gated
+  # instead of publishing an unvalidated marketplace.json straight to Pages.
+  validate:
+    name: Validate marketplace
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: node scripts/validate-marketplace.mjs
+
+  build-site:
+    name: Build marketplace-ui
+    needs: validate
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -26,21 +42,20 @@ jobs:
         with:
           node-version: "20"
 
-      - run: node scripts/validate-marketplace.mjs
-
       - run: npm ci
-        working-directory: site
+        working-directory: marketplace-ui
 
       # "prebuild" (npm lifecycle) runs scripts/build-index.mjs before this.
       - run: npm run build
-        working-directory: site
+        working-directory: marketplace-ui
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: site/dist
+          path: marketplace-ui/dist
 
   deploy:
-    needs: build
+    name: Deploy to GitHub Pages
+    needs: build-site
     runs-on: ubuntu-latest
     environment:
       name: github-pages

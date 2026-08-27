@@ -1,14 +1,13 @@
 #!/usr/bin/env node
-// Builds the data the UI in site/ reads at runtime:
-//   site/public/data/search-index.json
-//   site/public/data/changelog.json
+// Builds the data the UI in marketplace-ui/ reads at runtime:
+//   marketplace-ui/public/data/search-index.json
+//   marketplace-ui/public/data/changelog.json
 //
-// Walks plugins/** the same way validate-marketplace.mjs does, extracts
-// searchable metadata, and computes "related" items (build-time, so the
-// client never has to). No dependencies — matches the rest of scripts/.
+// Walks plugins/** the same way validate-marketplace.mjs does and extracts
+// searchable metadata. No dependencies — matches the rest of scripts/.
 //
 // If no plugins are registered yet (fresh marketplace), it falls back to
-// the bundled sample data in site/src/data/ so the UI prototype still has
+// the bundled sample data in marketplace-ui/src/data/ so the UI prototype still has
 // something to show. Real plugin data always wins once any are registered.
 import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, statSync } from "node:fs";
 import { join, dirname, relative } from "node:path";
@@ -17,8 +16,8 @@ import { execFileSync } from "node:child_process";
 
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 const marketplacePath = join(repoRoot, ".claude-plugin", "marketplace.json");
-const outDir = join(repoRoot, "site", "public", "data");
-const sampleDir = join(repoRoot, "site", "src", "data");
+const outDir = join(repoRoot, "marketplace-ui", "public", "data");
+const sampleDir = join(repoRoot, "marketplace-ui", "src", "data");
 
 function readJson(path) {
   return JSON.parse(readFileSync(path, "utf8"));
@@ -93,31 +92,18 @@ function collectMarkdownArtifacts(dir, type) {
       title: meta.name || itemName,
       description: meta.description || meta.summary || firstParagraph(body),
       tags: meta.tags || [],
+      invocation: meta.invocation || "",
+      tools: meta.tools || [],
       body,
     });
   }
   return items;
 }
 
-function buildQuality(pluginDir, pluginJson) {
-  const kebab = /^[a-z0-9]+(-[a-z0-9]+)*$/;
-  return {
-    validated: Boolean(
-      pluginJson.name &&
-        kebab.test(pluginJson.name) &&
-        pluginJson.description &&
-        pluginJson.version &&
-        pluginJson.author?.name
-    ),
-    hasExamples: isDir(join(pluginDir, "examples")),
-    hasHooks: existsSync(join(pluginDir, "hooks", "hooks.json")),
-  };
-}
-
 function buildItemsForPlugin(pluginName, pluginDir, pluginJson, marketplaceName) {
   const installCommand = `claude plugin install ${pluginName}@${marketplaceName}`;
-  const quality = buildQuality(pluginDir, pluginJson);
   const pluginTags = pluginJson.tags || [];
+  const updatedAt = gitUpdatedAt(join(pluginDir, ".claude-plugin", "plugin.json"));
 
   const pluginItem = {
     id: pluginName,
@@ -130,9 +116,14 @@ function buildItemsForPlugin(pluginName, pluginDir, pluginJson, marketplaceName)
     tags: pluginTags,
     author: pluginJson.author?.name || "",
     body: existsSync(join(pluginDir, "README.md")) ? readFileSync(join(pluginDir, "README.md"), "utf8") : "",
-    updatedAt: gitUpdatedAt(join(pluginDir, ".claude-plugin", "plugin.json")),
+    updatedAt,
     installCommand,
-    quality,
+    compatibility: pluginJson.compatibility || "",
+    dependencies: pluginJson.dependencies || [],
+    // One entry today (this plugin's current released version) — the shape
+    // is an array so a richer multi-release history can be added later
+    // (e.g. parsed from a per-plugin CHANGELOG.md) without a data migration.
+    changelog: [{ version: pluginJson.version, date: updatedAt, summary: pluginJson.description }],
   };
 
   const sub = [
@@ -152,44 +143,26 @@ function buildItemsForPlugin(pluginName, pluginDir, pluginJson, marketplaceName)
     body: a.body,
     updatedAt: gitUpdatedAt(a.path),
     installCommand,
-    quality,
+    invocation: a.invocation,
+    tools: a.tools,
   }));
 
   return [pluginItem, ...sub];
 }
 
-function computeRelated(items, limit = 3) {
-  for (const item of items) {
-    const tagSet = new Set(item.tags);
-    const scored = items
-      .filter((other) => other.id !== item.id)
-      .map((other) => {
-        const overlap = other.tags.filter((t) => tagSet.has(t)).length;
-        const sameplugin = other.plugin === item.plugin ? 0.5 : 0;
-        return { id: other.id, score: overlap + sameplugin };
-      })
-      .filter((s) => s.score > 0)
-      .sort((a, b) => b.score - a.score)
-      .slice(0, limit)
-      .map((s) => s.id);
-    item.related = scored;
-  }
-}
-
 function buildChangelog(items) {
-  const byPlugin = new Map();
+  const entries = [];
   for (const item of items) {
     if (item.type !== "plugin") continue;
-    byPlugin.set(item.plugin, item);
-  }
-  const entries = [];
-  for (const plugin of byPlugin.values()) {
-    entries.push({
-      plugin: plugin.plugin,
-      version: plugin.pluginVersion,
-      date: plugin.updatedAt,
-      title: `${plugin.plugin} ${plugin.pluginVersion}`,
-    });
+    for (const release of item.changelog || []) {
+      entries.push({
+        plugin: item.plugin,
+        pluginTitle: item.title,
+        version: release.version,
+        date: release.date,
+        summary: release.summary,
+      });
+    }
   }
   return entries.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
 }
@@ -233,7 +206,6 @@ function main() {
     );
   }
 
-  computeRelated(items);
   const changelog = buildChangelog(items);
 
   writeFileSync(join(outDir, "search-index.json"), `${JSON.stringify(items, null, 2)}\n`);
