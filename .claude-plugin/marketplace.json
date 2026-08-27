@@ -1,10 +1,15 @@
 {
   "name": "dev-digest-ai-marketplace",
   "owner": {
-    "name": "AneliiaOleksiuk",
+    "name": "Aneliia Oleksiuk",
     "email": "Aneliia.Oleksiuk@onseo.biz"
   },
   "description": "Private plugin marketplace for dev-digest-ai tools",
   "version": "0.1.0",
-  "plugins": []
+  "plugins": [
+    { "name": "sdd-workflow", "source": "./plugins/sdd-workflow" },
+    { "name": "researcher", "source": "./plugins/researcher" },
+    { "name": "architecture-reviewer", "source": "./plugins/architecture-reviewer" },
+    { "name": "shared-skills", "source": "./plugins/shared-skills" }
+  ]
 }

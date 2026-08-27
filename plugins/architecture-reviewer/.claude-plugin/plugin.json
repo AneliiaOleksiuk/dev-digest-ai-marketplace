@@ -1,0 +1,8 @@
+{
+  "name": "architecture-reviewer",
+  "description": "Read-only architectural auditor that checks a diff against the engineering-paved-path structural rules and any local conventions, reporting violations with file:line evidence.",
+  "version": "0.1.0",
+  "author": { "name": "AneliiaOleksiuk" },
+  "dependencies": [{ "name": "shared-skills", "version": "^0.1.0" }],
+  "tags": ["architecture", "code-review", "audit"]
+}
