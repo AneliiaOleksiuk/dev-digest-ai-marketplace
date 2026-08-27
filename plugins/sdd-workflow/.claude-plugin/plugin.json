@@ -1,8 +1,8 @@
 {
   "name": "sdd-workflow",
   "description": "Spec-driven development pipeline — spec, plan, implement, test, verify, document — as six coordinated agents plus a run-plan orchestrator and a manual workflow-retro skill.",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "author": { "name": "AneliiaOleksiuk" },
-  "dependencies": [{ "name": "shared-skills", "version": "^0.1.0" }],
+  "dependencies": [{ "name": "shared-skills", "version": "^1.0.0" }],
   "tags": ["sdd", "workflow", "spec-driven-development", "agents"]
 }

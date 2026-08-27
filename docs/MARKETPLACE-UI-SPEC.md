@@ -108,15 +108,18 @@ At the **plugin** level only, two additional fields:
 - `compatibility`: a free-text compatibility string (e.g. `"Claude Code ≥ 1.4"`,
   `"beta"`) sourced from an optional `compatibility` field in `plugin.json`.
   Rendered as a badge next to the version on the plugin detail page.
-- `dependencies`: `string[]`, each entry `"<plugin-name>"` or
-  `"<plugin-name>:<artifact-name>"`, sourced from an optional `dependencies`
-  array in `plugin.json`. This is the mechanism for the "some plugins are
-  reusable building blocks other plugins depend on" case (see
-  [SDD-PLUGINS-SPEC.md §3](./SDD-PLUGINS-SPEC.md)) — it's documentation, not
-  an enforced import: installing a plugin never auto-installs its
-  dependencies, but the detail page renders each entry as a clickable chip
-  linking to the referenced plugin (or straight to the referenced artifact's
-  detail page, if the `plugin:artifact` form is used), so a user installing
+- `dependencies`: `(string | { name, version?, marketplace? })[]`, sourced from
+  an optional `dependencies` array in `plugin.json`. A string entry is
+  `"<plugin-name>"` or `"<plugin-name>:<artifact-name>"`; an object entry pins
+  a semver range, e.g. `{ "name": "shared-skills", "version": "^1.0.0" }`.
+  This is the mechanism for the "some plugins are reusable building blocks
+  other plugins depend on" case (see
+  [SDD-PLUGINS-SPEC.md §3](./SDD-PLUGINS-SPEC.md)). Claude Code actually
+  resolves and auto-installs these (see
+  [PLUGIN-GUIDELINES.md](./PLUGIN-GUIDELINES.md)) — the detail page renders
+  each entry as a clickable chip linking to the referenced plugin (or
+  straight to the referenced artifact's detail page, if the `plugin:artifact`
+  string form is used), so a user installing
   `react-tools` sees it points at `engineering-paved-path` and knows to
   install that too.
 

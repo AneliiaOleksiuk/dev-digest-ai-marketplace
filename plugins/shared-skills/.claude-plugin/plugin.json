@@ -1,7 +1,7 @@
 {
   "name": "shared-skills",
   "description": "Reusable skills shared across the SDD plugin set — currently the engineering-paved-path layering and boundary skill used by sdd-workflow and architecture-reviewer.",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "author": { "name": "AneliiaOleksiuk" },
   "tags": ["shared", "skills", "dependency"]
 }
