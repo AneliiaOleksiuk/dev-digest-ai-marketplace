@@ -1,0 +1,77 @@
+{
+  "$schema": "sdd-workflow eval summary v1",
+  "plugin": "sdd-workflow",
+  "pluginVersion": "1.0.2",
+  "generatedAt": "2026-08-27T00:00:00Z",
+  "methodology": "manual-dry-run",
+  "methodologyNote": "claude plugin eval is still early-access gated in this environment. These numbers come from manually adopting each agent's role file in a fresh proxy agent and running the eval case's prompt.md by hand — real tool use, real repo state, graded manually against each case's graders/*.md. Not the native harness's aggregate-result.json. Full methodology and caveats in docs/COST-BASELINE.md.",
+  "costMethodology": {
+    "model": "claude-sonnet-5",
+    "inputPerMTok": 2.0,
+    "outputPerMTok": 10.0,
+    "note": "Token totals are unsplit (input+output+cache combined) — no per-run breakdown is available from a manually-spawned agent's completion summary. costUsd below uses a blended rate assuming ~88% input / 12% output tokens, typical for a tool-heavy agentic loop (mostly file reads and tool results, comparatively little generated text) — an estimate, not a measurement. costUsdRange gives the true bounds: costUsdRange[0] if every token were input-priced, costUsdRange[1] if every token were output-priced. Re-derive from response.usage once the native claude plugin eval harness is available."
+  },
+  "summary": {
+    "casesTotal": 10,
+    "casesRun": 10,
+    "passed": 10,
+    "failed": 0,
+    "totalTokens": 745235,
+    "totalSeconds": 3671.6,
+    "costUsd": 2.21,
+    "costUsdRange": [1.49, 7.45]
+  },
+  "history": [
+    {
+      "round": 1,
+      "version": "1.0.0 / 1.0.1",
+      "date": "2026-08-27",
+      "note": "Baseline — first dry run of each of the 8 cases that existed at the time.",
+      "casesRun": 8,
+      "totalRuns": 8,
+      "passed": 8,
+      "totalTokens": 567951,
+      "totalSeconds": 2292.5,
+      "costUsd": 1.68,
+      "costUsdRange": [1.14, 5.68]
+    },
+    {
+      "round": 2,
+      "version": "1.0.2",
+      "date": "2026-08-27",
+      "note": "Validates the new ask-before-shipping requirement: 3 regressions (one repeat of a Round 1 case, two cases run for the first time) plus 2 ad-hoc checks — not yet permanent eval files — confirming the new behavior actually fires on a genuinely ambiguous work item / test oracle.",
+      "casesRun": 3,
+      "adHocChecks": 2,
+      "totalRuns": 5,
+      "passed": 5,
+      "totalTokens": 322056,
+      "totalSeconds": 1720.1,
+      "costUsd": 0.95,
+      "costUsdRange": [0.64, 3.22]
+    }
+  ],
+  "comparablePair": {
+    "case": "plan-verifier-gathers-own-evidence",
+    "note": "The only case run identically in both rounds — same fixture, same grader. Every other row above differs between rounds, so this is the sole apples-to-apples data point. n=1 vs n=1 — not a real median, reported honestly rather than treated as proof either way.",
+    "round1": { "tokens": 43085, "toolCalls": 11, "seconds": 67.3, "costUsd": 0.13, "verdict": "FAIL (correct)" },
+    "round2": { "tokens": 45971, "toolCalls": 14, "seconds": 92.8, "costUsd": 0.14, "verdict": "FAIL (correct)" }
+  },
+  "cases": [
+    { "name": "spec-creator-clarifies-and-scopes", "type": "single", "tokens": 78650, "toolCalls": 26, "seconds": 284.4, "costUsd": 0.23, "outcome": "pass" },
+    { "name": "spec-creator-drafts-and-writes-when-unblocked", "type": "single", "tokens": 74963, "toolCalls": 26, "seconds": 231.8, "costUsd": 0.22, "outcome": "pass" },
+    { "name": "planner-reads-spec-not-invents", "type": "single", "tokens": 72106, "toolCalls": 32, "seconds": 174.9, "costUsd": 0.21, "outcome": "pass" },
+    { "name": "plan-verifier-gathers-own-evidence", "type": "single", "tokens": 45971, "toolCalls": 14, "seconds": 92.8, "costUsd": 0.14, "outcome": "pass" },
+    { "name": "sdd-workflow-inactive-on-unrelated-request", "type": "single", "tokens": 39913, "toolCalls": 9, "seconds": 21.8, "costUsd": 0.12, "outcome": "pass" },
+    { "name": "run-plan-delegates-to-implementer", "type": "chain", "tokens": 85517, "toolCalls": 37, "seconds": 402.3, "costUsd": 0.25, "outcome": "pass" },
+    { "name": "run-plan-invokes-architecture-reviewer", "type": "chain", "tokens": 86043, "toolCalls": 33, "seconds": 641.2, "costUsd": 0.25, "outcome": "pass" },
+    { "name": "run-plan-skips-architecture-reviewer-when-absent", "type": "chain", "tokens": 81104, "toolCalls": 25, "seconds": 661.7, "costUsd": 0.24, "outcome": "pass" },
+    { "name": "retro-triggered-on-explicit-request", "type": "chain", "tokens": 87674, "toolCalls": 32, "seconds": 468.8, "costUsd": 0.26, "outcome": "pass" },
+    { "name": "retro-not-triggered-automatically", "type": "chain", "tokens": 93294, "toolCalls": 28, "seconds": 691.9, "costUsd": 0.28, "outcome": "pass" }
+  ],
+  "findings": [
+    { "severity": "fixed", "summary": "3 ambiguities in run-plan/SKILL.md and plan-verifier.md (unattended-run approval, \"installed\" meaning, untracked-file evidence) — shipped in 1.0.1" },
+    { "severity": "fixed", "summary": "implementer, test-writer, doc-writer, and plan-verifier now stop and ask on a genuinely ambiguous work item instead of guessing — shipped in 1.0.2, validated by 5 additional dry runs" },
+    { "severity": "fixed", "summary": "spec-creator called Bash for a state-changing mkdir before Write, violating its own read-only-Bash constraint — now covered by a permanent grader" },
+    { "severity": "known-gap", "summary": "eval fixtures shared an unnamespaced file path and raced when run concurrently — fixed, but the fix itself has not yet been exercised by a real run" }
+  ]
+}

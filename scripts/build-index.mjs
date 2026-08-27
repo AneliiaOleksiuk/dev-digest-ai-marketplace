@@ -27,6 +27,21 @@ function isDir(path) {
   return existsSync(path) && statSync(path).isDirectory();
 }
 
+// Optional, per-plugin: plugins/<name>/evals/results/latest.json — a
+// committed summary of manual/CLI eval runs (see plugins/sdd-workflow/evals/
+// for the shape). Absent for any plugin that hasn't published one yet;
+// the UI treats a missing `evals` field as "no eval data" and hides the tab.
+function readEvalSummary(pluginDir) {
+  const path = join(pluginDir, "evals", "results", "latest.json");
+  if (!existsSync(path)) return null;
+  try {
+    return readJson(path);
+  } catch (err) {
+    console.warn(`Skipping malformed eval summary at ${relative(repoRoot, path)}: ${err.message}`);
+    return null;
+  }
+}
+
 function gitUpdatedAt(path) {
   try {
     const rel = relative(repoRoot, path);
@@ -124,6 +139,7 @@ function buildItemsForPlugin(pluginName, pluginDir, pluginJson, marketplaceName)
     // is an array so a richer multi-release history can be added later
     // (e.g. parsed from a per-plugin CHANGELOG.md) without a data migration.
     changelog: [{ version: pluginJson.version, date: updatedAt, summary: pluginJson.description }],
+    evals: readEvalSummary(pluginDir),
   };
 
   const sub = [
