@@ -43,6 +43,7 @@ extended to read it.
 | review gate invokes architecture-reviewer when installed | `run-plan-invokes-architecture-reviewer/` |
 | review gate skips cleanly when architecture-reviewer isn't installed | `run-plan-skips-architecture-reviewer-when-absent/` |
 | plan-verifier gathers its own evidence, doesn't trust implementer's report | `plan-verifier-gathers-own-evidence/` |
+| doc-writer proposes ADR text for a human instead of filing the ADR itself | `doc-writer-proposes-adr-never-writes/` |
 | workflow-retro (`run`) never fires on its own after a chain finishes | `retro-not-triggered-automatically/` |
 | workflow-retro fires on an explicit `/run` request | `retro-triggered-on-explicit-request/` |
 | unrelated request never activates the SDD workflow (negative eval) | `sdd-workflow-inactive-on-unrelated-request/` |

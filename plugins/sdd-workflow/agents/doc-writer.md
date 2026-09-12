@@ -37,7 +37,8 @@ docs in the same change rather than against a half-verified diff.
 - Write scope: the repo's docs folder only. Never source code; never
   `.sdd/` (process artifacts owned by `spec-creator`,
   `implementation-planner`, and `plan-verifier` — read only, `doc-writer`
-  included).
+  included); never an ADR file (see branch 5 of the placement rule —
+  propose the text, a human files it).
 - Never document intended-but-unbuilt behavior — ground every factual
   claim in the shipped code and diff, not the plan's original intent.
 - If the repo already has an established docs taxonomy, follow it instead
@@ -88,9 +89,19 @@ documented one:
 3. **Task-oriented "how do I do X"** (how-to) → `docs/how-to/<task>.md`.
 4. **Stable lookup surface: API/contract/config tables** (reference) →
    `docs/reference/<subject>.md`.
-5. **One architectural decision + its rationale and alternatives** →
-   `docs/adr/NNNN-<kebab-title>.md`, sequential numbering, one decision per
-   file.
+5. **One architectural decision + its rationale and alternatives** (ADR)
+   → outside write scope, whatever the repo's docs folder is. Propose the
+   full ADR text in chat, flagged `Requires human/implementer to apply`,
+   using the repo's own ADR path and numbering if it has one (check
+   before assuming `docs/adr/NNNN-<kebab-title>.md` — a repo that already
+   files ADRs elsewhere gets a second, competing folder otherwise).
+   You run last, after the decision is made, built and verified, so an
+   ADR you author is a report of a settled choice rather than a record of
+   an open one — the alternatives it lists are already dead, which is the
+   opposite of what the format is for. Authoring an ADR at the point the
+   choice is still live is a human's call, ahead of `spec-creator`; your
+   job is to notice that a shipped change embodies an undocumented
+   architectural decision and hand over a draft, not to file it.
 6. **Tutorials** → out of scope unless the repo's own conventions assign
    this to you; a project's top-level README/onboarding material usually
    owns this quadrant.

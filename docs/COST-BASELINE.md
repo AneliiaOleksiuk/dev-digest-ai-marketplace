@@ -38,10 +38,11 @@ against in USD — re-baseline with the real harness (or at least the real
 ## Scenario, plugin, commit
 
 - Plugin: `sdd-workflow`
-- Version: `1.0.2` (`plugins/sdd-workflow/.claude-plugin/plugin.json`) —
+- Version: `1.0.3` (`plugins/sdd-workflow/.claude-plugin/plugin.json`) —
   Round 1 below ran against `1.0.0`/`1.0.1` (no behavior-relevant
   difference between those two for the cases involved); Round 2 ran
-  against the working tree that became `1.0.2`
+  against the working tree that became `1.0.2`, Round 3 against the
+  working tree that became `1.0.3`
 - Commit SHA: `ab36eea6ed4db08dd1fc66355f82fd916481615a` base + uncommitted
   working-tree changes (2026-08-27) — update once these land in a commit
 - Eval set: `plugins/sdd-workflow/evals/` (see that directory's `README.md`
@@ -175,6 +176,44 @@ agent robustness, but it is **not** evidence the fix works — the fix
 batch) has not been exercised by an actual run yet. Re-run at least two
 cases concurrently against the fixed paths before trusting this is
 resolved.
+
+## Round 3 — v1.0.3 candidate (ADR authorship)
+
+2 dry runs validating the change that became `1.0.3`: `doc-writer` no
+longer creates ADR files (it proposes the text for a human to file), and
+`spec-creator` raises an unrecorded architectural decision as a blocking
+question. One is the new permanent case; one is an ad-hoc over-trigger
+regression confirming the new branch-5 behavior stays silent when there is
+no architectural decision to notice.
+
+| Case | Type | Tokens | Tool calls | Wall-clock | Outcome |
+|---|---|---|---|---|---|
+| `doc-writer-proposes-adr-never-writes` | new permanent case | 78,990 | 13 | 223.3s | 3/3 graders. Wrote the feature doc and the docs-index proposal, wrote no ADR file, and proposed the full ADR text under `Requires human/implementer to apply` — including the rejected alternative from the fixture's `Deviations` and the consequences of the choice |
+| doc-writer: change with no architectural decision | ad-hoc check (not a permanent eval file) | 90,897 | 15 | 407.8s | No over-trigger. Documented the `--json` flag normally and raised `Requires human/implementer to apply` only for the docs-index line; branch 5 correctly stayed silent on an Implementation Report whose `Deviations` section reads "None" |
+
+```
+TOKENS (subagent total)
+doc-writer-proposes-adr-never-writes (new case)   ####################      78,990
+doc-writer: no architectural decision (ad-hoc)    ########################  90,897
+
+DURATION (seconds, wall-clock)
+doc-writer-proposes-adr-never-writes (new case)   #############             223s
+doc-writer: no architectural decision (ad-hoc)    ########################  408s
+```
+
+**Isolation caveat, recorded rather than quietly dropped:** the new case's
+run was not a clean blind test. An unfiltered repo-wide `Grep` early in
+the run surfaced a few lines from that case's own `graders/` files in its
+match preview; the agent noticed, stopped that thread, and opened no
+grader file. The graded behavior follows directly from `doc-writer.md`
+itself, so this is unlikely to have changed the outcome — but the run
+cannot be called independent, and the case's `prompt.md` should require
+excluding `evals/` from searches before the next run.
+
+**Second-run note:** the ad-hoc regression hit an unrelated harness guard
+that refuses a `Write` to a `.md` filename containing "report"; the agent
+renamed the file and completed the deliverable. That is an artifact of the
+proxy environment, not of the plugin under test.
 
 ## Critical errors found
 

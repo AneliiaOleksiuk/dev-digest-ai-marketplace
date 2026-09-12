@@ -5,6 +5,48 @@ All notable changes to `sdd-workflow` are recorded here. Version lives in
 only — see [docs/RELEASES.md](../../docs/RELEASES.md) for the versioning
 policy.
 
+## 1.0.3 — 2026-09-12
+
+Fixes an ADR-authorship gap that ran the whole length of the chain. An
+ADR records a decision *while its alternatives are still live*, but
+`doc-writer` — the last agent to run, after the choice is made, built and
+verified — was the only agent that could create one, and the only place
+the chain created one at all. Anything it authored there was a report of
+a settled choice wearing an ADR's name.
+
+- `doc-writer`: branch 5 of the placement rule no longer writes
+  `docs/adr/NNNN-*.md`. It proposes the full ADR text in chat under
+  `Requires human/implementer to apply` — the same treatment branch 7
+  already gave out-of-scope artifacts — and defers to the repo's own ADR
+  path and numbering instead of assuming `docs/adr/NNNN`. ADR files are
+  now named in its hard constraints as outside write scope.
+- `spec-creator`: new "Undocumented architectural decisions" section. As
+  the earliest agent, it is the only one that meets a request while the
+  choices are still open, so a Spec that would commit to an architectural
+  decision nobody has recorded now stops as a `## Blocking questions`
+  entry rather than baking the choice in silently. Decisions already
+  covered by an ADR stay grounding; module-internal, reversible choices
+  stay with `implementation-planner`/`implementer`.
+- `README.md`: the handoff chain now shows a human-authored ADR as an
+  input ahead of `spec-creator`, and states that no agent in the chain
+  authors one.
+
+Validated by 2 manual dry runs against the working tree that became
+`1.0.3`: the new permanent case
+`evals/doc-writer-proposes-adr-never-writes/` (3/3 graders — no ADR file
+written, ADR text proposed in chat, and the proposal shaped as a decision
+record with the rejected alternative and consequences), plus one ad-hoc
+over-trigger regression confirming branch 5 stays silent on a change
+whose Implementation Report reports no deviations. Full detail in
+`docs/COST-BASELINE.md` (Round 3).
+
+Known gap in that validation, recorded in `evals/results/latest.json`:
+the new case's run was not a clean blind test — an unfiltered repo-wide
+`Grep` surfaced a few grader lines in its match preview. No grader file
+was opened, and the graded behavior follows directly from the role file,
+but the case prompt should require excluding `evals/` from searches
+before the next run.
+
 ## 1.0.2 — 2026-08-27
 
 Adds a consistent "Blocking questions — ask before shipping, don't guess
