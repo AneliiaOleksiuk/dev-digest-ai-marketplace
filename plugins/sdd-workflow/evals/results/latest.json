@@ -1,8 +1,8 @@
 {
   "$schema": "sdd-workflow eval summary v1",
   "plugin": "sdd-workflow",
-  "pluginVersion": "1.0.2",
-  "generatedAt": "2026-08-27T00:00:00Z",
+  "pluginVersion": "1.0.3",
+  "generatedAt": "2026-09-12T00:00:00Z",
   "methodology": "manual-dry-run",
   "methodologyNote": "claude plugin eval is still early-access gated in this environment. These numbers come from manually adopting each agent's role file in a fresh proxy agent and running the eval case's prompt.md by hand — real tool use, real repo state, graded manually against each case's graders/*.md. Not the native harness's aggregate-result.json. Full methodology and caveats in docs/COST-BASELINE.md.",
   "costMethodology": {
@@ -12,14 +12,14 @@
     "note": "Token totals are unsplit (input+output+cache combined) — no per-run breakdown is available from a manually-spawned agent's completion summary. costUsd below uses a blended rate assuming ~88% input / 12% output tokens, typical for a tool-heavy agentic loop (mostly file reads and tool results, comparatively little generated text) — an estimate, not a measurement. costUsdRange gives the true bounds: costUsdRange[0] if every token were input-priced, costUsdRange[1] if every token were output-priced. Re-derive from response.usage once the native claude plugin eval harness is available."
   },
   "summary": {
-    "casesTotal": 10,
-    "casesRun": 10,
-    "passed": 10,
+    "casesTotal": 11,
+    "casesRun": 11,
+    "passed": 11,
     "failed": 0,
-    "totalTokens": 745235,
-    "totalSeconds": 3671.6,
-    "costUsd": 2.21,
-    "costUsdRange": [1.49, 7.45]
+    "totalTokens": 824225,
+    "totalSeconds": 3894.9,
+    "costUsd": 2.44,
+    "costUsdRange": [1.65, 8.24]
   },
   "history": [
     {
@@ -48,6 +48,20 @@
       "totalSeconds": 1720.1,
       "costUsd": 0.95,
       "costUsdRange": [0.64, 3.22]
+    },
+    {
+      "round": 3,
+      "version": "1.0.3",
+      "date": "2026-09-12",
+      "note": "Validates the ADR-authorship change: doc-writer no longer creates ADR files, it proposes the text for a human to file, and spec-creator raises an unrecorded architectural decision as a blocking question. 1 new permanent case plus 1 ad-hoc over-trigger regression (not a permanent eval file) confirming branch 5 stays silent on a change with no architectural decision.",
+      "casesRun": 1,
+      "adHocChecks": 1,
+      "totalRuns": 2,
+      "passed": 2,
+      "totalTokens": 169887,
+      "totalSeconds": 631.1,
+      "costUsd": 0.50,
+      "costUsdRange": [0.34, 1.70]
     }
   ],
   "comparablePair": {
@@ -66,12 +80,15 @@
     { "name": "run-plan-invokes-architecture-reviewer", "type": "chain", "tokens": 86043, "toolCalls": 33, "seconds": 641.2, "costUsd": 0.25, "outcome": "pass" },
     { "name": "run-plan-skips-architecture-reviewer-when-absent", "type": "chain", "tokens": 81104, "toolCalls": 25, "seconds": 661.7, "costUsd": 0.24, "outcome": "pass" },
     { "name": "retro-triggered-on-explicit-request", "type": "chain", "tokens": 87674, "toolCalls": 32, "seconds": 468.8, "costUsd": 0.26, "outcome": "pass" },
-    { "name": "retro-not-triggered-automatically", "type": "chain", "tokens": 93294, "toolCalls": 28, "seconds": 691.9, "costUsd": 0.28, "outcome": "pass" }
+    { "name": "retro-not-triggered-automatically", "type": "chain", "tokens": 93294, "toolCalls": 28, "seconds": 691.9, "costUsd": 0.28, "outcome": "pass" },
+    { "name": "doc-writer-proposes-adr-never-writes", "type": "single", "tokens": 78990, "toolCalls": 13, "seconds": 223.3, "costUsd": 0.23, "outcome": "pass" }
   ],
   "findings": [
     { "severity": "fixed", "summary": "3 ambiguities in run-plan/SKILL.md and plan-verifier.md (unattended-run approval, \"installed\" meaning, untracked-file evidence) — shipped in 1.0.1" },
     { "severity": "fixed", "summary": "implementer, test-writer, doc-writer, and plan-verifier now stop and ask on a genuinely ambiguous work item instead of guessing — shipped in 1.0.2, validated by 5 additional dry runs" },
     { "severity": "fixed", "summary": "spec-creator called Bash for a state-changing mkdir before Write, violating its own read-only-Bash constraint — now covered by a permanent grader" },
-    { "severity": "known-gap", "summary": "eval fixtures shared an unnamespaced file path and raced when run concurrently — fixed, but the fix itself has not yet been exercised by a real run" }
+    { "severity": "fixed", "summary": "doc-writer authored ADR files as the last step of the chain, after the decision was already made and built — it now proposes the ADR text under \"Requires human/implementer to apply\", and spec-creator raises an unrecorded architectural decision as a blocking question before the work; shipped in 1.0.3, validated by 2 dry runs" },
+    { "severity": "known-gap", "summary": "eval fixtures shared an unnamespaced file path and raced when run concurrently — fixed, but the fix itself has not yet been exercised by a real run" },
+    { "severity": "known-gap", "summary": "the 1.0.3 dry run of doc-writer-proposes-adr-never-writes was not a clean blind test — an unfiltered repo-wide Grep surfaced a few grader lines in its match preview. No grader file was opened and the graded behavior follows directly from the role file, but the case prompt should require excluding evals/ from searches before the next run" }
   ]
 }

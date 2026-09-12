@@ -115,6 +115,9 @@ for how this was decided.
 ## Handoff chain
 
 ```
+ADR (human-authored, if the change needs one — an input, not an output)
+              │
+              ▼
 user → spec-creator → spec.md (optional — skip for small, obvious changes)
               │
               ▼
@@ -135,6 +138,14 @@ user → spec-creator → spec.md (optional — skip for small, obvious changes)
               ▼
          doc-writer → docs
 ```
+
+No agent in this chain authors an ADR. `spec-creator` reads the ones that
+exist and raises a blocking question when a Spec would otherwise commit to
+an architectural choice nobody has recorded; `doc-writer` proposes ADR text
+in chat for a human to file when shipped work turns out to embody one. The
+reason is the format itself — an ADR records a decision while its
+alternatives are still live, so the only correct moment to write one is
+before the work, which is upstream of every agent here.
 
 A `FAIL` or `PASS WITH REQUIRED FIXES` verdict, or a critical/high
 architecture finding, loops back to `implementer` against the *same*
